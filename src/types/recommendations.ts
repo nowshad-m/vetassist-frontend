@@ -23,8 +23,8 @@ export interface CaseRequest {
     likely_conditions: string[];
     recommended_actions: string[];
     suggested_products: { name: string; rationale: string; usage: string }[];
-    follow_up?: string[];
-    red_flags?: string[];
+    follow_up?: string | string[];
+    red_flags?: string | string[];
     job_sheet?: { title: string; instructions: string[]; consumables?: string[] };
     metadata?: { model?: string; created_at?: string; confidence?: number };
     citations?: string[];

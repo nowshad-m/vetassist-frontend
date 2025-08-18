@@ -115,11 +115,14 @@ export default function Page({ params }: PageProps) {
             </div>
           ) : null}
 
-          {rec.follow_up?.length ? (
+          {rec.follow_up ? (
             <div>
               <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-neutral-800">Follow-up</h3>
               <ul className="list-disc pl-4 sm:pl-5 space-y-1 sm:space-y-2 text-neutral-700 text-sm sm:text-base">
-                {rec.follow_up.map((f, k) => (<li key={k}>{f}</li>))}
+                {Array.isArray(rec.follow_up) 
+                  ? rec.follow_up.map((f, k) => (<li key={k}>{f}</li>))
+                  : <li>{rec.follow_up}</li>
+                }
               </ul>
             </div>
           ) : null}

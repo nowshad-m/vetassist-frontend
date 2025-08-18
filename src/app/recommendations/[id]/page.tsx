@@ -63,8 +63,17 @@ export default function Page({ params }: PageProps) {
             setRec(localRec);
             setActions(localRec.recommended_actions || []);
             setProducts(localRec.suggested_products || []);
-            setFollow((localRec.follow_up || []).join("\n"));
-            setFlags((localRec.red_flags || []).join("\n"));
+            
+            // Handle follow_up and red_flags as either string or array
+            const followUp = Array.isArray(localRec.follow_up) 
+              ? (localRec.follow_up as string[]).join("\n") 
+              : localRec.follow_up || "";
+            const redFlags = Array.isArray(localRec.red_flags) 
+              ? (localRec.red_flags as string[]).join("\n") 
+              : localRec.red_flags || "";
+            
+            setFollow(followUp);
+            setFlags(redFlags);
             setLoading(false);
             return;
           } else {
@@ -144,8 +153,17 @@ export default function Page({ params }: PageProps) {
         setRec(mappedRec);
         setActions(mappedRec.recommended_actions || []);
         setProducts(mappedRec.suggested_products || []);
-        setFollow((mappedRec.follow_up || []).join("\n"));
-        setFlags((mappedRec.red_flags || []).join("\n"));
+        
+                 // Handle follow_up and red_flags as either string or array
+         const followUp = Array.isArray(mappedRec.follow_up) 
+           ? (mappedRec.follow_up as string[]).join("\n") 
+           : mappedRec.follow_up || "";
+         const redFlags = Array.isArray(mappedRec.red_flags) 
+           ? (mappedRec.red_flags as string[]).join("\n") 
+           : mappedRec.red_flags || "";
+        
+        setFollow(followUp);
+        setFlags(redFlags);
         
         // Store in localStorage for future use
         localStorage.setItem(`rec-${id}`, JSON.stringify(mappedRec));
@@ -221,6 +239,7 @@ export default function Page({ params }: PageProps) {
       suggested_products: products,
       follow_up: follow.split(/\r?\n/).filter(Boolean),
       red_flags: flags.split(/\r?\n/).filter(Boolean),
+      citations: rec.citations || [],
     };
     localStorage.setItem(`rec-${id}-accepted`, JSON.stringify(accepted));
     window.location.href = `/job-sheet/${id}`;
@@ -374,6 +393,32 @@ export default function Page({ params }: PageProps) {
               />
             </div>
           </div>
+
+          {/* Citations Section */}
+          {rec.citations && rec.citations.length > 0 && (
+            <div className="card">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-neutral-800">References & Citations</h3>
+              </div>
+              <div className="space-y-2">
+                {rec.citations.map((citation, index) => (
+                  <div key={index} className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <span className="text-sm font-medium text-blue-800 bg-blue-100 px-2 py-1 rounded-full">
+                      {citation}
+                    </span>
+                    <span className="text-sm text-blue-700">
+                      Reference source for treatment recommendations
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right Sidebar - Action Buttons */}
