@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import type { RecommendationResponse } from "@/types/recommendations";
+import type { RecommendationResponse, CaseRequest } from "@/types/recommendations";
 import Section from "@/components/Section";
 import ActionsEditor from "@/components/ActionsEditor";
 import ProductsTable from "@/components/ProductsTable";
@@ -97,18 +97,23 @@ export default function Page({ params }: PageProps) {
       setLoading(true);
       setError(null);
       
-      // Call the API to get fresh recommendations
+      // Get the actual case data from localStorage (from case page)
+      const caseData = localStorage.getItem(`req-${id}`);
+      if (!caseData) {
+        setError("No case data found. Please go back to the case page and generate recommendations first.");
+        setLoading(false);
+        return;
+      }
+      
+      const caseRequest = JSON.parse(caseData) as CaseRequest;
+      
+      // Call the API with the actual case data
       const response = await fetch(`/api/recommendations`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          farm_id: "FARM-1023", // Default values for demo
-          farm_name: "Green Valley Dairy",
-          stock_class_id: "SC-001",
-          clinical_notes: "Dairy: high SCC, CMT+ quarters; subclinical mastitis."
-        })
+        body: JSON.stringify(caseRequest)
       });
 
       if (response.ok) {
@@ -149,7 +154,7 @@ export default function Page({ params }: PageProps) {
       <div className="py-8">
         <div className="text-center">
           <p className="text-lg text-red-600 mb-4">Error: {error}</p>
-          <div className="space-x-4">
+          <div className="space-x-4 mb-6">
             <button 
               onClick={fetchRecommendations}
               className="btn-primary px-6 py-2"
@@ -163,6 +168,7 @@ export default function Page({ params }: PageProps) {
               Regenerate from API
             </button>
           </div>
+          
           <a className="text-primary-700 underline mt-4 inline-block" href={`/case/${id}`}>
             Go back to case
           </a>
