@@ -14,42 +14,55 @@ export default function ProductsTable({value,onChange}:{value:Prod[];onChange:(v
   
   return (
     <div className="space-y-3">
+      {/* Table Header */}
+      <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-gradient-to-r from-neutral-50 to-neutral-100 rounded-lg border border-neutral-200">
+        <div className="col-span-4">
+          <span className="text-sm font-semibold text-neutral-700">Product Name</span>
+        </div>
+        <div className="col-span-4">
+          <span className="text-sm font-semibold text-neutral-700">Rationale</span>
+        </div>
+        <div className="col-span-3">
+          <span className="text-sm font-semibold text-neutral-700">Usage</span>
+        </div>
+        <div className="col-span-1 text-center">
+          <span className="text-sm font-semibold text-neutral-700">Actions</span>
+        </div>
+      </div>
+      
       {/* Table Rows */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {(value||[]).map((p,i)=>(
-          <div key={i} className="grid grid-cols-12 gap-4 px-4 py-3 bg-white rounded-lg border border-neutral-200 hover:border-neutral-300 transition-colors">
+          <div key={i} className="grid grid-cols-12 gap-4 px-4 py-4 bg-white rounded-xl border border-neutral-200 hover:border-neutral-300 hover:shadow-sm transition-all duration-200">
             <div className="col-span-4">
-              <textarea 
-                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-neutral-400 resize-none" 
+              <input 
+                className="w-full px-3 py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-neutral-400 text-sm" 
                 placeholder="Product name" 
                 value={p.name||""} 
                 onChange={e=>update(i,{name:e.target.value})}
-                rows={2}
               />
             </div>
             <div className="col-span-4">
-              <textarea 
-                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-neutral-400 resize-none" 
+              <input 
+                className="w-full px-3 py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-neutral-400 text-sm" 
                 placeholder="Rationale" 
                 value={p.rationale||""} 
                 onChange={e=>update(i,{rationale:e.target.value})}
-                rows={2}
               />
             </div>
             <div className="col-span-3">
-              <textarea 
-                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-neutral-400 resize-none" 
+              <input 
+                className="w-full px-3 py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-neutral-400 text-sm" 
                 placeholder="Usage" 
                 value={p.usage||""} 
                 onChange={e=>update(i,{usage:e.target.value})}
-                rows={2}
               />
             </div>
             <div className="col-span-1 flex justify-center">
               <button 
                 aria-label="Remove product"
                 title="Remove"
-                className="p-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors" 
+                className="p-2.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors" 
                 onClick={()=>remove(i)}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,7 +76,7 @@ export default function ProductsTable({value,onChange}:{value:Prod[];onChange:(v
       
       {/* Add Button */}
       <button 
-        className="w-full px-4 py-3 bg-neutral-50 border-2 border-dashed border-neutral-300 rounded-lg text-neutral-600 hover:bg-neutral-100 hover:border-neutral-400 transition-colors flex items-center justify-center space-x-2" 
+        className="w-full px-4 py-3 bg-gradient-to-r from-neutral-50 to-neutral-100 border-2 border-dashed border-neutral-300 rounded-xl text-neutral-600 hover:from-neutral-100 hover:to-neutral-200 hover:border-neutral-400 transition-all duration-200 flex items-center justify-center space-x-2" 
         onClick={add}
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

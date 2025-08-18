@@ -54,23 +54,34 @@ export default function Page({ params }: PageProps) {
       // Check if we have recommendations in localStorage (from case page)
       const localData = localStorage.getItem(`rec-${id}`);
       if (localData) {
-        const localRec = JSON.parse(localData) as RecommendationResponse;
-        console.log("📋 Loaded data from localStorage:", localRec);
-        setRec(localRec);
-        setActions(localRec.recommended_actions || []);
-        setProducts(localRec.suggested_products || []);
-        setFollow((localRec.follow_up || []).join("\n"));
-        setFlags((localRec.red_flags || []).join("\n"));
-      } else {
-        // No recommendations found - try to generate them automatically
-        console.log("🔄 No recommendations found, attempting to generate automatically...");
-        await regenerateRecommendations();
+        try {
+          const localRec = JSON.parse(localData) as RecommendationResponse;
+          console.log("📋 Loaded data from localStorage:", localRec);
+          
+          // Validate that we have the required data
+          if (localRec.case_summary && localRec.recommended_actions) {
+            setRec(localRec);
+            setActions(localRec.recommended_actions || []);
+            setProducts(localRec.suggested_products || []);
+            setFollow((localRec.follow_up || []).join("\n"));
+            setFlags((localRec.red_flags || []).join("\n"));
+            setLoading(false);
+            return;
+          } else {
+            console.log("⚠️ Incomplete data in localStorage, regenerating...");
+          }
+        } catch (parseError) {
+          console.log("⚠️ Error parsing localStorage data, regenerating...");
+        }
       }
+      
+      // No valid recommendations found - try to generate them automatically
+      console.log("🔄 No valid recommendations found, attempting to generate automatically...");
+      await regenerateRecommendations();
       
     } catch (err) {
       console.error("Error fetching recommendations:", err);
       setError(err instanceof Error ? err.message : "Failed to load recommendations");
-    } finally {
       setLoading(false);
     }
   };
@@ -114,6 +125,8 @@ export default function Page({ params }: PageProps) {
         
         // Handle the API response format - check if it's wrapped in 'result' or direct
         const responseData = apiRec.result || apiRec;
+        console.log("🔍 Processing response data:", responseData);
+        
         const mappedRec: RecommendationResponse = {
           case_summary: responseData.case_summary || '',
           likely_conditions: responseData.likely_conditions || [],
@@ -125,6 +138,8 @@ export default function Page({ params }: PageProps) {
           metadata: responseData.metadata,
           citations: responseData.citations
         };
+        
+        console.log("✅ Mapped recommendation data:", mappedRec);
         
         setRec(mappedRec);
         setActions(mappedRec.recommended_actions || []);
