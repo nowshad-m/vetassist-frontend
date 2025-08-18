@@ -26,16 +26,6 @@ export default function ActionsEditor({value,onChange}:{value:string[];onChange:
   
   return (
     <div className="space-y-3">
-      {/* Table Header */}
-      <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-neutral-50 rounded-lg border border-neutral-200">
-        <div className="col-span-10">
-          <span className="text-sm font-medium text-neutral-700">Recommended Action</span>
-        </div>
-        <div className="col-span-2 text-center">
-          <span className="text-sm font-medium text-neutral-700">Actions</span>
-        </div>
-      </div>
-      
       {/* Table Rows */}
       <div className="space-y-2">
         {items.map((action,i)=>(

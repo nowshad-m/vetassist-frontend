@@ -62,8 +62,9 @@ export default function Page({ params }: PageProps) {
         setFollow((localRec.follow_up || []).join("\n"));
         setFlags((localRec.red_flags || []).join("\n"));
       } else {
-        // No recommendations found - user needs to generate them first
-        setError("No recommendations found. Please go back to the case page and generate recommendations first.");
+        // No recommendations found - try to generate them automatically
+        console.log("🔄 No recommendations found, attempting to generate automatically...");
+        await regenerateRecommendations();
       }
       
     } catch (err) {
@@ -111,17 +112,18 @@ export default function Page({ params }: PageProps) {
         const apiRec = await response.json();
         console.log("✅ API response data:", apiRec);
         
-        // Use the new API response format directly
+        // Handle the API response format - check if it's wrapped in 'result' or direct
+        const responseData = apiRec.result || apiRec;
         const mappedRec: RecommendationResponse = {
-          case_summary: apiRec.result?.case_summary || '',
-          likely_conditions: apiRec.result?.likely_conditions || [],
-          recommended_actions: apiRec.result?.recommended_actions || [],
-          suggested_products: apiRec.result?.suggested_products || [],
-          follow_up: apiRec.result?.follow_up || [],
-          red_flags: apiRec.result?.red_flags || [],
-          job_sheet: apiRec.result?.job_sheet,
-          metadata: apiRec.result?.metadata,
-          citations: apiRec.result?.citations
+          case_summary: responseData.case_summary || '',
+          likely_conditions: responseData.likely_conditions || [],
+          recommended_actions: responseData.recommended_actions || [],
+          suggested_products: responseData.suggested_products || [],
+          follow_up: responseData.follow_up || [],
+          red_flags: responseData.red_flags || [],
+          job_sheet: responseData.job_sheet,
+          metadata: responseData.metadata,
+          citations: responseData.citations
         };
         
         setRec(mappedRec);

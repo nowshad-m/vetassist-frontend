@@ -14,48 +14,35 @@ export default function ProductsTable({value,onChange}:{value:Prod[];onChange:(v
   
   return (
     <div className="space-y-3">
-      {/* Table Header */}
-      <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-neutral-50 rounded-lg border border-neutral-200">
-        <div className="col-span-4">
-          <span className="text-sm font-medium text-neutral-700">Product Name</span>
-        </div>
-        <div className="col-span-4">
-          <span className="text-sm font-medium text-neutral-700">Rationale</span>
-        </div>
-        <div className="col-span-3">
-          <span className="text-sm font-medium text-neutral-700">Usage</span>
-        </div>
-        <div className="col-span-1 text-center">
-          <span className="text-sm font-medium text-neutral-700">Actions</span>
-        </div>
-      </div>
-      
       {/* Table Rows */}
       <div className="space-y-2">
         {(value||[]).map((p,i)=>(
           <div key={i} className="grid grid-cols-12 gap-4 px-4 py-3 bg-white rounded-lg border border-neutral-200 hover:border-neutral-300 transition-colors">
             <div className="col-span-4">
-              <input 
-                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-neutral-400" 
+              <textarea 
+                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-neutral-400 resize-none" 
                 placeholder="Product name" 
                 value={p.name||""} 
                 onChange={e=>update(i,{name:e.target.value})}
+                rows={2}
               />
             </div>
             <div className="col-span-4">
-              <input 
-                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-neutral-400" 
+              <textarea 
+                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-neutral-400 resize-none" 
                 placeholder="Rationale" 
                 value={p.rationale||""} 
                 onChange={e=>update(i,{rationale:e.target.value})}
+                rows={2}
               />
             </div>
             <div className="col-span-3">
-              <input 
-                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-neutral-400" 
+              <textarea 
+                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors placeholder-neutral-400 resize-none" 
                 placeholder="Usage" 
                 value={p.usage||""} 
                 onChange={e=>update(i,{usage:e.target.value})}
+                rows={2}
               />
             </div>
             <div className="col-span-1 flex justify-center">
