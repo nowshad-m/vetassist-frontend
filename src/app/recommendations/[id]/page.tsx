@@ -38,6 +38,17 @@ export default function Page({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Function to clear old sample data
+  const clearOldData = () => {
+    // Clear any old sample data that might be cached
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith('rec-') && key !== `rec-${id}`) {
+        localStorage.removeItem(key);
+      }
+    });
+  };
+
   useEffect(() => {
     const resolveParams = async () => {
       const resolvedParams = await params;
@@ -48,6 +59,7 @@ export default function Page({ params }: PageProps) {
 
   useEffect(() => {
     if (id) {
+      clearOldData(); // Clear old data first
       fetchRecommendations();
     }
   }, [id]);
@@ -57,7 +69,7 @@ export default function Page({ params }: PageProps) {
       setLoading(true);
       setError(null);
       
-      // Get from localStorage (this is where the POST /api/recommendations stores the data)
+      // Check if we have recommendations in localStorage (from case page)
       const localData = localStorage.getItem(`rec-${id}`);
       if (localData) {
         const localRec = JSON.parse(localData) as RecommendationResponse;
@@ -71,31 +83,51 @@ export default function Page({ params }: PageProps) {
         setError("No recommendations found. Please go back to the case page and generate recommendations first.");
       }
       
-      // TODO: When you have a GET /recommendations/{id} API endpoint, uncomment this:
-      // const response = await fetch(`/api/recommendations/${id}`, {
-      //   method: "GET",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      // });
-      // 
-      // if (response.ok) {
-      //   const apiRec = await response.json();
-      //   setRec(apiRec);
-      //   setActions(apiRec.recommended_actions || []);
-      //   setProducts(apiRec.products || []);
-      //   setFollow((apiRec.follow_up || []).join("\n"));
-      //   setFlags((apiRec.red_flags || []).join("\n"));
-      //   
-      //   // Store in localStorage for future use
-      //   localStorage.setItem(`rec-${id}`, JSON.stringify(apiRec));
-      // } else {
-      //   throw new Error(`Failed to fetch recommendations: ${response.statusText}`);
-      // }
-      
     } catch (err) {
       console.error("Error fetching recommendations:", err);
       setError(err instanceof Error ? err.message : "Failed to load recommendations");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to regenerate recommendations (for testing purposes)
+  const regenerateRecommendations = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Call the API to get fresh recommendations
+      const response = await fetch(`/api/recommendations`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          farm_id: "FARM-1023", // Default values for demo
+          farm_name: "Green Valley Dairy",
+          stock_class_id: "SC-001",
+          clinical_notes: "Dairy: high SCC, CMT+ quarters; subclinical mastitis."
+        })
+      });
+
+      if (response.ok) {
+        const apiRec = await response.json();
+        setRec(apiRec);
+        setActions(apiRec.recommended_actions || []);
+        setProducts(apiRec.products || []);
+        setFollow((apiRec.follow_up || []).join("\n"));
+        setFlags((apiRec.red_flags || []).join("\n"));
+        
+        // Store in localStorage for future use
+        localStorage.setItem(`rec-${id}`, JSON.stringify(apiRec));
+      } else {
+        throw new Error(`Failed to fetch recommendations: ${response.statusText}`);
+      }
+      
+    } catch (err) {
+      console.error("Error regenerating recommendations:", err);
+      setError(err instanceof Error ? err.message : "Failed to regenerate recommendations");
     } finally {
       setLoading(false);
     }
@@ -117,13 +149,21 @@ export default function Page({ params }: PageProps) {
       <div className="py-8">
         <div className="text-center">
           <p className="text-lg text-red-600 mb-4">Error: {error}</p>
-          <button 
-            onClick={fetchRecommendations}
-            className="btn-primary px-6 py-2"
-          >
-            Retry
-          </button>
-          <a className="text-primary-700 underline mt-4 ml-4 inline-block" href={`/case/${id}`}>
+          <div className="space-x-4">
+            <button 
+              onClick={fetchRecommendations}
+              className="btn-primary px-6 py-2"
+            >
+              Retry
+            </button>
+            <button 
+              onClick={regenerateRecommendations}
+              className="btn-secondary px-6 py-2"
+            >
+              Regenerate from API
+            </button>
+          </div>
+          <a className="text-primary-700 underline mt-4 inline-block" href={`/case/${id}`}>
             Go back to case
           </a>
         </div>
