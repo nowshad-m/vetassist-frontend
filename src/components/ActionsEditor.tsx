@@ -1,20 +1,19 @@
 "use client";
 import { useState, useEffect } from "react";
-type Item = { action:string; severity?:string; priority?:number; rationale?:string; };
 
-export default function ActionsEditor({value,onChange}:{value:Item[];onChange:(v:Item[])=>void}) {
-  const [items,setItems]=useState<Item[]>(value||[]);
+export default function ActionsEditor({value,onChange}:{value:string[];onChange:(v:string[])=>void}) {
+  const [items,setItems]=useState<string[]>(value||[]);
   useEffect(()=>setItems(value||[]),[value]);
   
-  const update=(i:number,patch:Partial<Item>)=>{ 
+  const update=(i:number,action:string)=>{ 
     const next=[...items]; 
-    next[i]={...next[i],...patch}; 
+    next[i]=action; 
     setItems(next); 
     onChange(next); 
   };
   
   const add=()=>{ 
-    const next=[...items,{ action:"", severity:"moderate", priority:(items?.length||0)+1 }]; 
+    const next=[...items,""]; 
     setItems(next); 
     onChange(next); 
   };
@@ -27,31 +26,14 @@ export default function ActionsEditor({value,onChange}:{value:Item[];onChange:(v
   
   return (
     <div className="space-y-4">
-      {items.map((it,i)=>(
+      {items.map((action,i)=>(
         <div key={i} className="card">
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
             <input 
-              className="sm:col-span-6 input-field" 
-              placeholder="Action" 
-              value={it.action} 
-              onChange={e=>update(i,{action:e.target.value})}
-            />
-            <select 
-              className="sm:col-span-2 input-field" 
-              value={it.severity||""} 
-              onChange={e=>update(i,{severity:e.target.value})}
-            >
-              <option value="critical">Critical</option>
-              <option value="high">High</option>
-              <option value="moderate">Moderate</option>
-              <option value="low">Low</option>
-            </select>
-            <input 
-              type="number" 
-              className="sm:col-span-2 input-field" 
-              placeholder="Priority" 
-              value={it.priority||0} 
-              onChange={e=>update(i,{priority:Number(e.target.value)})}
+              className="sm:col-span-10 input-field" 
+              placeholder="Recommended action" 
+              value={action} 
+              onChange={e=>update(i,e.target.value)}
             />
             <button 
               aria-label="Remove action"

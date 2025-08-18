@@ -74,9 +74,9 @@ export default function Page({ params }: PageProps) {
           <div>
             <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-neutral-800">Actions</h3>
             <ul className="list-disc pl-4 sm:pl-5 space-y-1 sm:space-y-2">
-              {rec.recommended_actions?.map((a, i) => (
+              {rec.recommended_actions?.map((action, i) => (
                 <li key={i} className="text-neutral-700 text-sm sm:text-base">
-                  <span className="font-semibold text-primary-600">[{a.severity ?? "-"} P{a.priority ?? "-"}]</span> {a.action}
+                  {action}
                 </li>
               ))}
             </ul>
@@ -89,22 +89,16 @@ export default function Page({ params }: PageProps) {
                 <thead className="bg-neutral-50">
                   <tr>
                     <th className="p-2 sm:p-3 text-left text-neutral-700 font-medium">Name</th>
-                    <th className="p-2 sm:p-3 text-center text-neutral-700 font-medium">Dose</th>
-                    <th className="p-2 sm:p-3 text-center text-neutral-700 font-medium">Route</th>
-                    <th className="p-2 sm:p-3 text-center text-neutral-700 font-medium">Duration</th>
-                    <th className="p-2 sm:p-3 text-center text-neutral-700 font-medium">Withholding</th>
+                    <th className="p-2 sm:p-3 text-left text-neutral-700 font-medium">Rationale</th>
+                    <th className="p-2 sm:p-3 text-left text-neutral-700 font-medium">Usage</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {rec.products?.map((p, i) => (
+                  {rec.suggested_products?.map((p, i) => (
                     <tr key={i} className="border-t border-neutral-200 hover:bg-neutral-50">
                       <td className="p-2 sm:p-3 font-medium text-neutral-800">{p.name}</td>
-                      <td className="p-2 sm:p-3 text-center text-neutral-600">{p.dose || "-"}</td>
-                      <td className="p-2 sm:p-3 text-center text-neutral-600">{p.route || "-"}</td>
-                      <td className="p-2 sm:p-3 text-center text-neutral-600">{p.duration || "-"}</td>
-                      <td className="p-2 sm:p-3 text-center text-neutral-600">
-                        {p.withholding_period ? `milk:${p.withholding_period.milk || "-"} meat:${p.withholding_period.meat || "-"}` : "-"}
-                      </td>
+                      <td className="p-2 sm:p-3 text-neutral-600">{p.rationale}</td>
+                      <td className="p-2 sm:p-3 text-neutral-600">{p.usage}</td>
                     </tr>
                   ))}
                 </tbody>

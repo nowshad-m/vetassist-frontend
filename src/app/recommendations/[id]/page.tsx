@@ -9,29 +9,11 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-interface Action {
-  action: string;
-  rationale?: string;
-  severity?: "low" | "moderate" | "high" | "critical" | string;
-  priority?: number;
-}
-
-interface Product {
-  name: string;
-  active_ingredient?: string;
-  dose?: string;
-  route?: string;
-  duration?: string;
-  withholding_period?: { milk?: string; meat?: string };
-  cautions?: string[];
-  alternatives?: string[];
-}
-
 export default function Page({ params }: PageProps) {
   const [id, setId] = useState<string>("");
   const [rec, setRec] = useState<RecommendationResponse | null>(null);
-  const [actions, setActions] = useState<Action[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [actions, setActions] = useState<string[]>([]);
+  const [products, setProducts] = useState<{ name: string; rationale: string; usage: string }[]>([]);
   const [follow, setFollow] = useState<string>("");
   const [flags, setFlags] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -75,7 +57,7 @@ export default function Page({ params }: PageProps) {
         console.log("📋 Loaded data from localStorage:", localRec);
         setRec(localRec);
         setActions(localRec.recommended_actions || []);
-        setProducts(localRec.products || []);
+        setProducts(localRec.suggested_products || []);
         setFollow((localRec.follow_up || []).join("\n"));
         setFlags((localRec.red_flags || []).join("\n"));
       } else {
@@ -128,21 +110,22 @@ export default function Page({ params }: PageProps) {
         const apiRec = await response.json();
         console.log("✅ API response data:", apiRec);
         
-        // Extract data from the 'result' wrapper and map 'suggested_products' to 'products'
+        // Use the new API response format directly
         const mappedRec: RecommendationResponse = {
           case_summary: apiRec.result?.case_summary || '',
           likely_conditions: apiRec.result?.likely_conditions || [],
           recommended_actions: apiRec.result?.recommended_actions || [],
-          products: apiRec.result?.suggested_products || [], // Map suggested_products to products
+          suggested_products: apiRec.result?.suggested_products || [],
           follow_up: apiRec.result?.follow_up || [],
           red_flags: apiRec.result?.red_flags || [],
           job_sheet: apiRec.result?.job_sheet,
-          metadata: apiRec.result?.metadata
+          metadata: apiRec.result?.metadata,
+          citations: apiRec.result?.citations
         };
         
         setRec(mappedRec);
         setActions(mappedRec.recommended_actions || []);
-        setProducts(mappedRec.products || []);
+        setProducts(mappedRec.suggested_products || []);
         setFollow((mappedRec.follow_up || []).join("\n"));
         setFlags((mappedRec.red_flags || []).join("\n"));
         
@@ -217,7 +200,7 @@ export default function Page({ params }: PageProps) {
     const accepted: RecommendationResponse = {
       ...rec,
       recommended_actions: actions,
-      products,
+      suggested_products: products,
       follow_up: follow.split(/\r?\n/).filter(Boolean),
       red_flags: flags.split(/\r?\n/).filter(Boolean),
     };
@@ -225,7 +208,7 @@ export default function Page({ params }: PageProps) {
     window.location.href = `/job-sheet/${id}`;
   };
   
-  const copyJSON = () => navigator.clipboard.writeText(JSON.stringify({ ...rec, recommended_actions: actions, products }, null, 2));
+  const copyJSON = () => navigator.clipboard.writeText(JSON.stringify({ ...rec, recommended_actions: actions, suggested_products: products }, null, 2));
 
   return (
     <div className="py-8">

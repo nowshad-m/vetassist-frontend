@@ -21,11 +21,12 @@ export interface CaseRequest {
   export interface RecommendationResponse {
     case_summary: string;
     likely_conditions: string[];
-    recommended_actions: { action: string; rationale?: string; severity?: "low"|"moderate"|"high"|"critical"|string; priority?: number; }[];
-    products: { name: string; active_ingredient?: string; dose?: string; route?: string; duration?: string; withholding_period?: { milk?: string; meat?: string }; cautions?: string[]; alternatives?: string[]; }[];
+    recommended_actions: string[];
+    suggested_products: { name: string; rationale: string; usage: string }[];
     follow_up?: string[];
     red_flags?: string[];
     job_sheet?: { title: string; instructions: string[]; consumables?: string[] };
     metadata?: { model?: string; created_at?: string; confidence?: number };
+    citations?: string[];
   }
   
