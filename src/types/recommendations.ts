@@ -1,0 +1,31 @@
+export interface CaseRequest {
+    farm_id: string;
+    farm_name: string;
+    stock_class_id: string;
+    clinical_notes: string;
+  }
+  
+  export interface Visit {
+    id: string;
+    farm_id: string;
+    farm_name: string;
+    stock_class_id: string;
+    stock_class_name: string;
+    animal_species: "bovine" | "ovine" | "caprine" | "equine" | "porcine" | "canine" | "feline" | string;
+    animal_id: string;
+    time: string;
+    status: "New" | "In-Progress" | "Completed" | "Cancelled";
+    date?: string;
+  }
+  
+  export interface RecommendationResponse {
+    case_summary: string;
+    likely_conditions: string[];
+    recommended_actions: { action: string; rationale?: string; severity?: "low"|"moderate"|"high"|"critical"|string; priority?: number; }[];
+    products: { name: string; active_ingredient?: string; dose?: string; route?: string; duration?: string; withholding_period?: { milk?: string; meat?: string }; cautions?: string[]; alternatives?: string[]; }[];
+    follow_up?: string[];
+    red_flags?: string[];
+    job_sheet?: { title: string; instructions: string[]; consumables?: string[] };
+    metadata?: { model?: string; created_at?: string; confidence?: number };
+  }
+  

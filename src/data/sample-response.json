@@ -1,0 +1,36 @@
+{
+    "case_summary": "Adult dairy cow down 24h post-calving with cold extremities and weak pulse — consistent with periparturient hypocalcemia (milk fever).",
+    "likely_conditions": ["Milk fever (hypocalcemia)"],
+    "recommended_actions": [
+      { "action": "Administer 500 mL 23% calcium borogluconate IV slowly with cardiac monitoring", "severity": "critical", "priority": 1 },
+      { "action": "Follow with 500 mL SQ split at two sites", "severity": "high", "priority": 2 },
+      { "action": "Provide oral calcium gel/bolus after standing", "severity": "moderate", "priority": 3 },
+      { "action": "Soft bedding; assist to sternal; prevent bloat", "severity": "moderate" }
+    ],
+    "products": [
+      {
+        "name": "Calcium Borogluconate 23%",
+        "active_ingredient": "Calcium borogluconate",
+        "dose": "500 mL IV slow; then 500 mL SQ (split)",
+        "route": "IV + SQ",
+        "duration": "Single dose; reassess 6–12h",
+        "withholding_period": { "milk": "Nil", "meat": "Nil" },
+        "cautions": ["Cardiac arrhythmia risk if IV too rapid"],
+        "alternatives": ["Oral calcium bolus 43g Ca"]
+      }
+    ],
+    "follow_up": ["Recheck in 12 hours", "Monitor appetite, rumen motility, and stance"],
+    "red_flags": ["Tachycardia >120 bpm", "Recumbency >24h post-treatment"],
+    "job_sheet": {
+      "title": "Milk Fever – Immediate Treatment",
+      "instructions": [
+        "IV 23% Ca borogluconate over 10–15 min with auscultation",
+        "SQ split dose after standing",
+        "Provide oral Ca bolus when safe",
+        "Assist rising with hip lifter/float if needed"
+      ],
+      "consumables": ["IV set", "Calcium solution", "Gloves", "Stethoscope"]
+    },
+    "metadata": { "model": "azure:gpt-4o-mini", "created_at": "2025-08-17T12:00:00Z", "confidence": 0.82 }
+  }
+  
