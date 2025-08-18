@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import sample from "@/data/sample-response.json";
 
 export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => ({}));
-  if (!body?.clinical_notes || !String(body.clinical_notes).trim()) {
-    return NextResponse.json({ error: "Clinical notes are required" }, { status: 400 });
-  }
-  await new Promise(r => setTimeout(r, 600));
-  return NextResponse.json(sample);
+  const body = await req.json();
+  const upstream = await fetch(`${process.env.API_BASE}/recommendations`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${process.env.API_TOKEN}` // server-only env var
+    },
+    body: JSON.stringify(body),
+    cache: "no-store"
+  });
+  const data = await upstream.json();
+  return NextResponse.json(data, { status: upstream.status });
 }
