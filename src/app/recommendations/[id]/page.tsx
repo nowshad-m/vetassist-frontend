@@ -18,6 +18,7 @@ export default function Page({ params }: PageProps) {
   const [flags, setFlags] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showDebugTools, setShowDebugTools] = useState(false);
 
   // Function to clear old sample data
   const clearOldData = () => {
@@ -222,17 +223,31 @@ export default function Page({ params }: PageProps) {
       
       <h1 className="text-3xl font-bold text-neutral-800 mb-6">AI Recommendations</h1>
 
-      {/* Temporary Test API Button */}
-      <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <h3 className="text-lg font-medium text-blue-800 mb-2">🧪 Test API Functionality</h3>
-        <p className="text-blue-700 mb-3">Use this button to test your Azure API directly:</p>
-        <button 
-          onClick={regenerateRecommendations}
-          className="btn-primary px-6 py-2"
+      {/* Debug Tools Toggle */}
+      <div className="mb-6">
+        <button
+          onClick={() => setShowDebugTools(!showDebugTools)}
+          className="flex items-center space-x-2 px-4 py-2 text-sm text-neutral-600 hover:text-neutral-800 transition-colors"
         >
-          Test API Call
+          <svg className={`w-4 h-4 transition-transform ${showDebugTools ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+          <span>Debug Tools</span>
         </button>
-        <p className="text-sm text-blue-600 mt-2">Check browser console for detailed logs</p>
+        
+        {showDebugTools && (
+          <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h3 className="text-lg font-medium text-blue-800 mb-2">🧪 Test API Functionality</h3>
+            <p className="text-blue-700 mb-3">Use this button to test your Azure API directly:</p>
+            <button 
+              onClick={regenerateRecommendations}
+              className="btn-primary px-6 py-2"
+            >
+              Test API Call
+            </button>
+            <p className="text-sm text-blue-600 mt-2">Check browser console for detailed logs</p>
+          </div>
+        )}
       </div>
 
       {/* Top Section: Summary and Likely Conditions */}
@@ -284,7 +299,7 @@ export default function Page({ params }: PageProps) {
               </div>
               <h2 className="text-xl font-semibold text-neutral-800">Recommended Actions</h2>
             </div>
-            <p className="text-sm text-neutral-600 mb-4">Edit priorities and severity as needed for your treatment plan.</p>
+            <p className="text-sm text-neutral-600 mb-4">Review and customize the recommended actions for your treatment plan.</p>
             <ActionsEditor value={actions} onChange={setActions} />
           </div>
 
@@ -298,7 +313,7 @@ export default function Page({ params }: PageProps) {
               </div>
               <h2 className="text-xl font-semibold text-neutral-800">Products & Medications</h2>
             </div>
-            <p className="text-sm text-neutral-600 mb-4">Review and customize the recommended products and dosages.</p>
+            <p className="text-sm text-neutral-600 mb-4">Review and customize the recommended products with their rationale and usage instructions.</p>
             <ProductsTable value={products} onChange={setProducts} />
           </div>
 
