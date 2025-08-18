@@ -14,7 +14,12 @@ export default function HomePage() {
   // Load sample visits data
   useEffect(() => {
     // For now, use sample data directly since we don't have a visits API
-    setVisitsData(visits);
+    // Cast the visits data to match the Visit type interface
+    const typedVisits = visits.map(visit => ({
+      ...visit,
+      status: visit.status as "New" | "In-Progress" | "Completed" | "Cancelled"
+    }));
+    setVisitsData(typedVisits);
     setLoading(false);
     
     // TODO: When you have a visits API, uncomment this:
