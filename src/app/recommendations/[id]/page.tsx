@@ -226,6 +226,19 @@ export default function Page({ params }: PageProps) {
       
       <h1 className="text-3xl font-bold text-neutral-800 mb-6">AI Recommendations</h1>
 
+      {/* Temporary Test API Button */}
+      <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <h3 className="text-lg font-medium text-blue-800 mb-2">🧪 Test API Functionality</h3>
+        <p className="text-blue-700 mb-3">Use this button to test your Azure API directly:</p>
+        <button 
+          onClick={regenerateRecommendations}
+          className="btn-primary px-6 py-2"
+        >
+          Test API Call
+        </button>
+        <p className="text-sm text-blue-600 mt-2">Check browser console for detailed logs</p>
+      </div>
+
       {/* Top Section: Summary and Likely Conditions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Case Summary */}
