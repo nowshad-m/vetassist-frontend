@@ -97,8 +97,12 @@ export default function Page({ params }: PageProps) {
       setLoading(true);
       setError(null);
       
+      console.log("🔄 Regenerating recommendations...");
+      
       // Get the actual case data from localStorage (from case page)
       const caseData = localStorage.getItem(`req-${id}`);
+      console.log("📋 Case data from localStorage:", caseData);
+      
       if (!caseData) {
         setError("No case data found. Please go back to the case page and generate recommendations first.");
         setLoading(false);
@@ -106,6 +110,7 @@ export default function Page({ params }: PageProps) {
       }
       
       const caseRequest = JSON.parse(caseData) as CaseRequest;
+      console.log("📤 Sending case request to API:", caseRequest);
       
       // Call the API with the actual case data
       const response = await fetch(`/api/recommendations`, {
@@ -116,8 +121,12 @@ export default function Page({ params }: PageProps) {
         body: JSON.stringify(caseRequest)
       });
 
+      console.log("📥 API response status:", response.status);
+      console.log("📥 API response headers:", Object.fromEntries(response.headers.entries()));
+
       if (response.ok) {
         const apiRec = await response.json();
+        console.log("✅ API response data:", apiRec);
         setRec(apiRec);
         setActions(apiRec.recommended_actions || []);
         setProducts(apiRec.products || []);
@@ -126,12 +135,15 @@ export default function Page({ params }: PageProps) {
         
         // Store in localStorage for future use
         localStorage.setItem(`rec-${id}`, JSON.stringify(apiRec));
+        console.log("💾 Stored recommendations in localStorage");
       } else {
+        const errorText = await response.text();
+        console.error("❌ API error response:", errorText);
         throw new Error(`Failed to fetch recommendations: ${response.statusText}`);
       }
       
     } catch (err) {
-      console.error("Error regenerating recommendations:", err);
+      console.error("💥 Error regenerating recommendations:", err);
       setError(err instanceof Error ? err.message : "Failed to regenerate recommendations");
     } finally {
       setLoading(false);
