@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
+  if (!process.env.API_KEY) {
+    return NextResponse.json(
+      { error: "API_KEY environment variable not configured" },
+      { status: 500 }
+    );
+  }
+
   const body = await req.json();
-  const upstream = await fetch(`${process.env.API_BASE}/recommendations`, {
+  const upstream = await fetch(`${process.env.API_BASE}/analyze`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${process.env.API_TOKEN}` // server-only env var
+      "x-api-key": process.env.API_KEY
     },
     body: JSON.stringify(body),
     cache: "no-store"
