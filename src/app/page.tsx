@@ -8,47 +8,48 @@ import Breadcrumb from "@/components/Breadcrumb";
 export default function HomePage() {
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [visits, setVisits] = useState<Visit[]>([]);
+  const [visitsData, setVisitsData] = useState<Visit[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Load sample visits data
   useEffect(() => {
     // For now, use sample data directly since we don't have a visits API
-    setVisits(visits);
+    setVisitsData(visits);
     setLoading(false);
     
     // TODO: When you have a visits API, uncomment this:
     // fetchVisits();
   }, []);
 
-  const fetchVisits = async () => {
-    try {
-      setLoading(true);
-      
-      // Try to fetch from API first
-      const response = await fetch('/api/visits', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const apiVisits = await response.json();
-        setVisits(apiVisits);
-      } else {
-        // Fallback to sample data if API fails
-        console.warn('API failed, using sample data');
-        setVisits(visits);
-      }
-    } catch (err) {
-      console.error('Error fetching visits:', err);
-      // Fallback to sample data
-      setVisits(visits);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // TODO: When you have a visits API, uncomment this function:
+  // const fetchVisits = async () => {
+  //   try {
+  //     setLoading(true);
+  //     
+  //     // Try to fetch from API first
+  //     const response = await fetch('/api/visits', {
+  //       method: 'GET',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     });
+  // 
+  //     if (response.ok) {
+  //       const apiVisits = await response.json();
+  //       setVisitsData(apiVisits);
+  //     } else {
+  //       // Fallback to sample data if API fails
+  //       console.warn('API failed, using sample data');
+  //       setVisitsData(visits);
+  //     }
+  //   } catch (err) {
+  //     console.error('Error fetching visits:', err);
+  //     // Fallback to sample data
+  //     setVisitsData(visits);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // Get current time for the indicator line
   const currentTime = new Date();
@@ -77,7 +78,7 @@ export default function HomePage() {
   };
 
   // Filter visits for today
-  const todayVisits = visits.filter(visit => {
+  const todayVisits = visitsData.filter(visit => {
     // For demo purposes, we'll show all visits as "today's"
     return true;
   });

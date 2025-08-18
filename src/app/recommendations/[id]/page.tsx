@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { RecommendationResponse, CaseRequest } from "@/types/recommendations";
-import Section from "@/components/Section";
 import ActionsEditor from "@/components/ActionsEditor";
 import ProductsTable from "@/components/ProductsTable";
 import Breadcrumb from "@/components/Breadcrumb";
@@ -62,7 +61,7 @@ export default function Page({ params }: PageProps) {
       clearOldData(); // Clear old data first
       fetchRecommendations();
     }
-  }, [id]);
+  }, [id]); // Remove function dependencies to avoid circular reference
 
   const fetchRecommendations = async () => {
     try {

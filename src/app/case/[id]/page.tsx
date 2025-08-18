@@ -5,6 +5,7 @@ import type { CaseRequest, RecommendationResponse, Visit } from "@/types/recomme
 import FarmInfoHeader from "@/components/FarmInfoHeader";
 import Breadcrumb from "@/components/Breadcrumb";
 import VoiceInput from "@/components/VoiceInput";
+import Link from "next/link";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -141,7 +142,7 @@ export default function Page({ params }: PageProps) {
       <div className="py-4 sm:py-8">
         <div className="text-center">
           <p className="text-lg text-neutral-600">Case not found.</p>
-          <a className="text-primary-700 underline mt-2 inline-block" href="/">Go back to dashboard</a>
+          <Link className="text-primary-700 underline mt-2 inline-block" href="/">Go back to dashboard</Link>
         </div>
       </div>
     );
