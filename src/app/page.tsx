@@ -2,11 +2,53 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import visits from "@/data/visits.json";
+import type { Visit } from "@/types/recommendations";
 import Breadcrumb from "@/components/Breadcrumb";
 
 export default function HomePage() {
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [visits, setVisits] = useState<Visit[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load sample visits data
+  useEffect(() => {
+    // For now, use sample data directly since we don't have a visits API
+    setVisits(visits);
+    setLoading(false);
+    
+    // TODO: When you have a visits API, uncomment this:
+    // fetchVisits();
+  }, []);
+
+  const fetchVisits = async () => {
+    try {
+      setLoading(true);
+      
+      // Try to fetch from API first
+      const response = await fetch('/api/visits', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const apiVisits = await response.json();
+        setVisits(apiVisits);
+      } else {
+        // Fallback to sample data if API fails
+        console.warn('API failed, using sample data');
+        setVisits(visits);
+      }
+    } catch (err) {
+      console.error('Error fetching visits:', err);
+      // Fallback to sample data
+      setVisits(visits);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Get current time for the indicator line
   const currentTime = new Date();
@@ -167,189 +209,198 @@ export default function HomePage() {
       </div>
 
       {/* Summary Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="card text-center">
-          <div className="text-2xl font-bold text-primary-600">{todayVisits.length}</div>
-          <div className="text-sm text-neutral-600 font-medium">Total Visits</div>
+      {loading ? (
+        <div className="card text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto mb-4"></div>
+          <p className="text-lg text-neutral-600">Loading visits...</p>
         </div>
-        <div className="card text-center">
-          <div className="text-2xl font-bold text-orange-500">
-            {todayVisits.filter(v => v.status === "New").length}
-          </div>
-          <div className="text-sm text-neutral-600 font-medium">New Cases</div>
-        </div>
-        <div className="card text-center">
-          <div className="text-2xl font-bold text-blue-500">
-            {todayVisits.filter(v => v.status === "In-Progress").length}
-          </div>
-          <div className="text-sm text-neutral-600 font-medium">In Progress</div>
-        </div>
-        <div className="card text-center">
-          <div className="text-2xl font-bold text-primary-500">
-            {todayVisits.filter(v => v.status === "Completed").length}
-          </div>
-          <div className="text-sm text-neutral-600 font-medium">Completed</div>
-        </div>
-      </div>
-
-      {/* Calendar View */}
-      <div className="card p-0 overflow-hidden">
-        {/* Calendar Header */}
-        <div className="bg-neutral-50 px-6 py-4 border-b border-neutral-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <span className="font-semibold text-neutral-800">Dr. Veterinarian</span>
-                <span className="text-sm text-neutral-500">({todayVisits.length} appointments)</span>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="card text-center">
+              <div className="text-2xl font-bold text-primary-600">{todayVisits.length}</div>
+              <div className="text-sm text-neutral-600 font-medium">Total Visits</div>
+            </div>
+            <div className="card text-center">
+              <div className="text-2xl font-bold text-orange-500">
+                {todayVisits.filter(v => v.status === "New").length}
               </div>
+              <div className="text-sm text-neutral-600 font-medium">New Cases</div>
+            </div>
+            <div className="card text-center">
+              <div className="text-2xl font-bold text-blue-500">
+                {todayVisits.filter(v => v.status === "In-Progress").length}
+              </div>
+              <div className="text-sm text-neutral-600 font-medium">In Progress</div>
+            </div>
+            <div className="card text-center">
+              <div className="text-2xl font-bold text-primary-500">
+                {todayVisits.filter(v => v.status === "Completed").length}
+              </div>
+              <div className="text-sm text-neutral-600 font-medium">Completed</div>
             </div>
           </div>
-        </div>
 
-        {viewMode === 'day' ? (
-          /* Day View */
-          <div className="relative">
-            {/* Current Time Indicator */}
-            <div 
-              className="absolute left-0 right-0 z-10 flex items-center"
-              style={{ 
-                top: `${((currentHour - 7) * 60 + currentMinute) * 0.8}px` 
-              }}
-            >
-              <div className="w-16 h-0.5 bg-primary-500"></div>
-              <div className="w-3 h-3 bg-primary-500 rounded-full"></div>
-              <span className="ml-2 text-xs font-medium text-primary-700">
-                {currentHour.toString().padStart(2, '0')}:{currentMinute.toString().padStart(2, '0')}
-              </span>
-            </div>
-
-            {/* Time Slots and Appointments */}
-            <div className="grid grid-cols-1 gap-0">
-              {timeSlots.map((time, timeIndex) => {
-                const visitAtThisTime = todayVisits.find(v => v.time === time);
-                const isCurrentTime = time === `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
-                
-                return (
-                  <div 
-                    key={time} 
-                    className={`relative min-h-[60px] border-b border-neutral-100 ${
-                      isCurrentTime ? 'bg-primary-50' : ''
-                    }`}
-                  >
-                    {/* Time Label */}
-                    <div className="absolute left-4 top-2 w-12 text-xs font-medium text-neutral-500">
-                      {time}
+          {/* Calendar View */}
+          <div className="card p-0 overflow-hidden">
+            {/* Calendar Header */}
+            <div className="bg-neutral-50 px-6 py-4 border-b border-neutral-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
                     </div>
-                    
-                    {/* Appointment Card */}
-                    {visitAtThisTime && (
-                      <div className="ml-20 mr-4 my-1">
-                        <Link 
-                          href={`/case/${visitAtThisTime.id}`}
-                          className="block bg-white border border-neutral-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center space-x-3">
-                              {/* Animal Icon */}
-                              <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                                <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                </svg>
-                              </div>
-                              
-                              {/* Visit Details */}
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2 mb-1">
-                                  <span className="text-sm font-medium text-neutral-800">
-                                    {visitAtThisTime.stock_class_name}
-                                  </span>
-                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                    getAppointmentBgColor(visitAtThisTime.status)
-                                  }`}>
-                                    {visitAtThisTime.status}
-                                  </span>
-                                </div>
-                                <p className="text-sm text-neutral-600">{visitAtThisTime.farm_name}</p>
-                              </div>
-                            </div>
-                            
-                            {/* Action Icons */}
-                            <div className="flex items-center space-x-1">
-                              <div className="p-1 text-neutral-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                              </div>
-                            </div>
-                          </div>
-                        </Link>
-                      </div>
-                    )}
+                    <span className="font-semibold text-neutral-800">Dr. Veterinarian</span>
+                    <span className="text-sm text-neutral-500">({todayVisits.length} appointments)</span>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        ) : (
-          /* Week View */
-          <div className="overflow-x-auto">
-            <div className="min-w-[800px]">
-              {/* Week Header */}
-              <div className="grid grid-cols-8 border-b border-neutral-200">
-                <div className="p-3 bg-neutral-50 font-medium text-neutral-700">Time</div>
-                {weekDays.map((day, index) => (
-                  <div key={index} className="p-3 bg-neutral-50 font-medium text-neutral-700 text-center">
-                    <div className="text-sm font-semibold">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                    <div className="text-xs text-neutral-500">{day.getDate()}</div>
-                  </div>
-                ))}
+                </div>
               </div>
+            </div>
 
-              {/* Time Slots */}
-              {timeSlots.map((time, timeIndex) => (
-                <div key={time} className="grid grid-cols-8 border-b border-neutral-100 min-h-[60px]">
-                  {/* Time Label */}
-                  <div className="p-2 bg-neutral-50 text-xs font-medium text-neutral-500 flex items-center">
-                    {time}
-                  </div>
-                  
-                  {/* Day Columns */}
-                  {weekDays.map((day, dayIndex) => {
+            {viewMode === 'day' ? (
+              /* Day View */
+              <div className="relative">
+                {/* Current Time Indicator */}
+                <div 
+                  className="absolute left-0 right-0 z-10 flex items-center"
+                  style={{ 
+                    top: `${((currentHour - 7) * 60 + currentMinute) * 0.8}px` 
+                  }}
+                >
+                  <div className="w-16 h-0.5 bg-primary-500"></div>
+                  <div className="w-3 h-3 bg-primary-500 rounded-full"></div>
+                  <span className="ml-2 text-xs font-medium text-primary-700">
+                    {currentHour.toString().padStart(2, '0')}:{currentMinute.toString().padStart(2, '0')}
+                  </span>
+                </div>
+
+                {/* Time Slots and Appointments */}
+                <div className="grid grid-cols-1 gap-0">
+                  {timeSlots.map((time, timeIndex) => {
                     const visitAtThisTime = todayVisits.find(v => v.time === time);
-                    const isToday = day.toDateString() === new Date().toDateString();
+                    const isCurrentTime = time === `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
                     
                     return (
                       <div 
-                        key={dayIndex} 
-                        className={`p-1 border-l border-neutral-100 ${
-                          isToday ? 'bg-primary-50' : ''
+                        key={time} 
+                        className={`relative min-h-[60px] border-b border-neutral-100 ${
+                          isCurrentTime ? 'bg-primary-50' : ''
                         }`}
                       >
+                        {/* Time Label */}
+                        <div className="absolute left-4 top-2 w-12 text-xs font-medium text-neutral-500">
+                          {time}
+                        </div>
+                        
+                        {/* Appointment Card */}
                         {visitAtThisTime && (
-                          <Link 
-                            href={`/case/${visitAtThisTime.id}`}
-                            className={`block w-full h-full min-h-[50px] rounded-lg p-2 text-white text-xs font-medium transition-all duration-200 hover:scale-105 cursor-pointer ${getAppointmentColor(visitAtThisTime.status)}`}
-                          >
-                            <div className="font-semibold mb-1">{visitAtThisTime.stock_class_name}</div>
-                            <div className="text-white/90">{visitAtThisTime.farm_name}</div>
-                            <div className="text-white/80 text-[10px] mt-1">{visitAtThisTime.status}</div>
-                          </Link>
+                          <div className="ml-20 mr-4 my-1">
+                            <Link 
+                              href={`/case/${visitAtThisTime.id}`}
+                              className="block bg-white border border-neutral-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-center space-x-3">
+                                  {/* Animal Icon */}
+                                  <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+                                    <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                  </div>
+                                  
+                                  {/* Visit Details */}
+                                  <div className="flex-1">
+                                    <div className="flex items-center space-x-2 mb-1">
+                                      <span className="text-sm font-medium text-neutral-800">
+                                        {visitAtThisTime.stock_class_name}
+                                      </span>
+                                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                        getAppointmentBgColor(visitAtThisTime.status)
+                                      }`}>
+                                        {visitAtThisTime.status}
+                                      </span>
+                                    </div>
+                                    <p className="text-sm text-neutral-600">{visitAtThisTime.farm_name}</p>
+                                  </div>
+                                </div>
+                                
+                                {/* Action Icons */}
+                                <div className="flex items-center space-x-1">
+                                  <div className="p-1 text-neutral-400">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                  </div>
+                                </div>
+                              </div>
+                            </Link>
+                          </div>
                         )}
                       </div>
                     );
                   })}
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : (
+              /* Week View */
+              <div className="overflow-x-auto">
+                <div className="min-w-[800px]">
+                  {/* Week Header */}
+                  <div className="grid grid-cols-8 border-b border-neutral-200">
+                    <div className="p-3 bg-neutral-50 font-medium text-neutral-700">Time</div>
+                    {weekDays.map((day, index) => (
+                      <div key={index} className="p-3 bg-neutral-50 font-medium text-neutral-700 text-center">
+                        <div className="text-sm font-semibold">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                        <div className="text-xs text-neutral-500">{day.getDate()}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Time Slots */}
+                  {timeSlots.map((time, timeIndex) => (
+                    <div key={time} className="grid grid-cols-8 border-b border-neutral-100 min-h-[60px]">
+                      {/* Time Label */}
+                      <div className="p-2 bg-neutral-50 text-xs font-medium text-neutral-500 flex items-center">
+                        {time}
+                      </div>
+                      
+                      {/* Day Columns */}
+                      {weekDays.map((day, dayIndex) => {
+                        const visitAtThisTime = todayVisits.find(v => v.time === time);
+                        const isToday = day.toDateString() === new Date().toDateString();
+                        
+                        return (
+                          <div 
+                            key={dayIndex} 
+                            className={`p-1 border-l border-neutral-100 ${
+                              isToday ? 'bg-primary-50' : ''
+                            }`}
+                          >
+                            {visitAtThisTime && (
+                              <Link 
+                                href={`/case/${visitAtThisTime.id}`}
+                                className={`block w-full h-full min-h-[50px] rounded-lg p-2 text-white text-xs font-medium transition-all duration-200 hover:scale-105 cursor-pointer ${getAppointmentColor(visitAtThisTime.status)}`}
+                              >
+                                <div className="font-semibold mb-1">{visitAtThisTime.stock_class_name}</div>
+                                <div className="text-white/90">{visitAtThisTime.farm_name}</div>
+                                <div className="text-white/80 text-[10px] mt-1">{visitAtThisTime.status}</div>
+                              </Link>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
 
       {/* Quick Actions */}
       <div className="mt-8">

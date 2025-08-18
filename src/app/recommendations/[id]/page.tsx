@@ -35,6 +35,8 @@ export default function Page({ params }: PageProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [follow, setFollow] = useState<string>("");
   const [flags, setFlags] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const resolveParams = async () => {
@@ -46,26 +48,99 @@ export default function Page({ params }: PageProps) {
 
   useEffect(() => {
     if (id) {
-      const s = localStorage.getItem(`rec-${id}`);
-      if (s) { 
-        const r = JSON.parse(s) as RecommendationResponse; 
-        setRec(r); 
-        setActions(r.recommended_actions || []); 
-        setProducts(r.products || []); 
-        setFollow((r.follow_up || []).join("\n")); 
-        setFlags((r.red_flags || []).join("\n")); 
-      }
+      fetchRecommendations();
     }
   }, [id]);
 
-  if (!rec) return (
-    <div className="py-8">
-      <div className="text-center">
-        <p className="text-lg text-neutral-600">No recommendations yet.</p>
-        <a className="text-primary-700 underline mt-2 inline-block" href={`/case/${id}`}>Go back</a>
+  const fetchRecommendations = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Get from localStorage (this is where the POST /api/recommendations stores the data)
+      const localData = localStorage.getItem(`rec-${id}`);
+      if (localData) {
+        const localRec = JSON.parse(localData) as RecommendationResponse;
+        setRec(localRec);
+        setActions(localRec.recommended_actions || []);
+        setProducts(localRec.products || []);
+        setFollow((localRec.follow_up || []).join("\n"));
+        setFlags((localRec.red_flags || []).join("\n"));
+      } else {
+        // No recommendations found - user needs to generate them first
+        setError("No recommendations found. Please go back to the case page and generate recommendations first.");
+      }
+      
+      // TODO: When you have a GET /recommendations/{id} API endpoint, uncomment this:
+      // const response = await fetch(`/api/recommendations/${id}`, {
+      //   method: "GET",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      // });
+      // 
+      // if (response.ok) {
+      //   const apiRec = await response.json();
+      //   setRec(apiRec);
+      //   setActions(apiRec.recommended_actions || []);
+      //   setProducts(apiRec.products || []);
+      //   setFollow((apiRec.follow_up || []).join("\n"));
+      //   setFlags((apiRec.red_flags || []).join("\n"));
+      //   
+      //   // Store in localStorage for future use
+      //   localStorage.setItem(`rec-${id}`, JSON.stringify(apiRec));
+      // } else {
+      //   throw new Error(`Failed to fetch recommendations: ${response.statusText}`);
+      // }
+      
+    } catch (err) {
+      console.error("Error fetching recommendations:", err);
+      setError(err instanceof Error ? err.message : "Failed to load recommendations");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto mb-4"></div>
+          <p className="text-lg text-neutral-600">Loading recommendations...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="py-8">
+        <div className="text-center">
+          <p className="text-lg text-red-600 mb-4">Error: {error}</p>
+          <button 
+            onClick={fetchRecommendations}
+            className="btn-primary px-6 py-2"
+          >
+            Retry
+          </button>
+          <a className="text-primary-700 underline mt-4 ml-4 inline-block" href={`/case/${id}`}>
+            Go back to case
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  if (!rec) {
+    return (
+      <div className="py-8">
+        <div className="text-center">
+          <p className="text-lg text-neutral-600">No recommendations found.</p>
+          <a className="text-primary-700 underline mt-2 inline-block" href={`/case/${id}`}>Go back to case</a>
+        </div>
+      </div>
+    );
+  }
 
   const accept = () => {
     const accepted: RecommendationResponse = {

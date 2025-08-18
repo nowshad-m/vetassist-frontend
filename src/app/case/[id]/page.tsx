@@ -13,6 +13,7 @@ interface PageProps {
 export default function Page({ params }: PageProps) {
   const [id, setId] = useState<string>("");
   const [pre, setPre] = useState<Visit | null>(null);
+  const [loading, setLoading] = useState(true);
   
   // Handle async params
   useEffect(() => {
@@ -20,15 +21,61 @@ export default function Page({ params }: PageProps) {
       try {
         const resolvedParams = await params;
         setId(resolvedParams.id);
-        const foundVisit = visits.find(v => v.id === resolvedParams.id);
-        setPre(foundVisit as Visit || null);
+        await fetchVisitData(resolvedParams.id);
       } catch (error) {
         console.error("Error resolving params:", error);
+        setLoading(false);
       }
     };
     resolveParams();
   }, [params]);
-  
+
+  const fetchVisitData = async (visitId: string) => {
+    try {
+      setLoading(true);
+      
+      // For now, use sample data directly since we don't have a visits API
+      const foundVisit = visits.find((v) => v.id === visitId) as Visit | undefined;
+      if (foundVisit) {
+        setPre(foundVisit);
+      } else {
+        console.error('Visit not found in sample data');
+      }
+      
+      // TODO: When you have a visits API, uncomment this:
+      // const response = await fetch(`/api/visits/${visitId}`, {
+      //   method: "GET",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      // });
+      // 
+      // if (response.ok) {
+      //   const visitData = await response.json();
+      //   setPre(visitData);
+      // } else {
+      //   // Fallback to sample data if API fails
+      //   console.warn('API failed, using sample data');
+      //   const foundVisit = visits.find((v) => v.id === visitId) as Visit | undefined;
+      //   if (foundVisit) {
+      //     setPre(foundVisit);
+      //   } else {
+      //     throw new Error('Visit not found');
+      //   }
+      // }
+      
+    } catch (err) {
+      console.error('Error fetching visit data:', err);
+      // Fallback to sample data
+      const foundVisit = visits.find((v) => v.id === visitId) as Visit | undefined;
+      if (foundVisit) {
+        setPre(foundVisit);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [form, setForm] = useState<CaseRequest>({
     farm_id: "",
     farm_name: "",
@@ -78,11 +125,23 @@ export default function Page({ params }: PageProps) {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="py-4 sm:py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto mb-4"></div>
+          <p className="text-lg text-neutral-600">Loading case information...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!pre) {
     return (
       <div className="py-4 sm:py-8">
         <div className="text-center">
-          <p className="text-lg text-neutral-600">Loading case information...</p>
+          <p className="text-lg text-neutral-600">Case not found.</p>
+          <a className="text-primary-700 underline mt-2 inline-block" href="/">Go back to dashboard</a>
         </div>
       </div>
     );
