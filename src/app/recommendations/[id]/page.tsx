@@ -72,6 +72,7 @@ export default function Page({ params }: PageProps) {
       const localData = localStorage.getItem(`rec-${id}`);
       if (localData) {
         const localRec = JSON.parse(localData) as RecommendationResponse;
+        console.log("📋 Loaded data from localStorage:", localRec);
         setRec(localRec);
         setActions(localRec.recommended_actions || []);
         setProducts(localRec.products || []);
@@ -126,14 +127,27 @@ export default function Page({ params }: PageProps) {
       if (response.ok) {
         const apiRec = await response.json();
         console.log("✅ API response data:", apiRec);
-        setRec(apiRec);
-        setActions(apiRec.recommended_actions || []);
-        setProducts(apiRec.products || []);
-        setFollow((apiRec.follow_up || []).join("\n"));
-        setFlags((apiRec.red_flags || []).join("\n"));
+        
+        // Extract data from the 'result' wrapper and map 'suggested_products' to 'products'
+        const mappedRec: RecommendationResponse = {
+          case_summary: apiRec.result?.case_summary || '',
+          likely_conditions: apiRec.result?.likely_conditions || [],
+          recommended_actions: apiRec.result?.recommended_actions || [],
+          products: apiRec.result?.suggested_products || [], // Map suggested_products to products
+          follow_up: apiRec.result?.follow_up || [],
+          red_flags: apiRec.result?.red_flags || [],
+          job_sheet: apiRec.result?.job_sheet,
+          metadata: apiRec.result?.metadata
+        };
+        
+        setRec(mappedRec);
+        setActions(mappedRec.recommended_actions || []);
+        setProducts(mappedRec.products || []);
+        setFollow((mappedRec.follow_up || []).join("\n"));
+        setFlags((mappedRec.red_flags || []).join("\n"));
         
         // Store in localStorage for future use
-        localStorage.setItem(`rec-${id}`, JSON.stringify(apiRec));
+        localStorage.setItem(`rec-${id}`, JSON.stringify(mappedRec));
         console.log("💾 Stored recommendations in localStorage");
       } else {
         const errorText = await response.text();
