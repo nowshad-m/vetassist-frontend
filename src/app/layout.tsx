@@ -3,7 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "VetAssist",
+  title: "VetPilot",
   description: "Veterinary assistance application",
 };
 
@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </svg>
                 </div>
                 <Link className="text-2xl font-bold text-white hover:text-primary-100 transition-colors" href="/">
-                  VetAssist
+                  VetPilot
                 </Link>
               </div>
               

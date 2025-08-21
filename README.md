@@ -1,4 +1,4 @@
-# VetAssist Frontend
+# VetPilot Frontend
 
 A modern veterinary assistance application built with Next.js and Tailwind CSS.
 
