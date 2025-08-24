@@ -257,7 +257,7 @@ export default function Page({ params }: PageProps) {
         ]} 
       />
       
-      <h1 className="text-3xl font-bold text-neutral-800 mb-6">AI Recommendations</h1>
+      <h1 className="text-3xl font-bold text-neutral-800 mb-6">AI Summary</h1>
 
       {/* Debug Tools Toggle */}
       <div className="mb-6">

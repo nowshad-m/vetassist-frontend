@@ -181,7 +181,7 @@ export default function Page({ params }: PageProps) {
           className="btn-primary w-full sm:w-auto px-8 py-4" 
           onClick={generate}
         >
-          Generate Recommendations
+          Generate Summary
         </button>
       </div>
     </div>
